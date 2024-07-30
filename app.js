@@ -1,11 +1,16 @@
-const http = require("http");
-const routes = require("./routes")
+const http = require("http")
+const express = require("express")
 
-console.log(routes.someText)
+const app = express()
 
-const server = http.createServer(routes.handler);
+app.use((req, res, next) => {
+  console.log(req.method, req.url)
+  next()
+})
 
-const port = 4000
-server.listen(port, () => {
-  console.log(`Server running on port ${port}`);
-});
+app.use((req, res, next) => {
+  res.send({ key1: "value" })
+  // res.send("<h1>value</h1>")
+})
+
+app.listen(4000)
