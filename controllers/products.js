@@ -8,11 +8,10 @@ exports.getProduct = (req, res, next) => {
       formsCSS: true,
       productCSS: true,
       activeAddProduct: true
-    });
+    })
 }
 
 exports.postProduct = (req, res, next) => {
-    // products.push({ title: req.body.title, size: req.body.size });
     const product = new Product(req.body.title, req.body.size)
     product.save()
     res.redirect('/');
