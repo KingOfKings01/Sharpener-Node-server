@@ -18,7 +18,7 @@ exports.postProduct = (req, res, next) => {
   }
 
 exports.getProducts = async (req, res, next) => {
-    const products = await Product.fetchAll()
+    const [products] = await Product.fetchAll()
     res.render('shop', {
       prods: products,
       pageTitle: 'Shop',

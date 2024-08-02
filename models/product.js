@@ -1,70 +1,67 @@
-const fs = require("fs");
-const path = require("path");
-
-const productPath = path.join(
-  path.dirname(process.mainModule.filename),
-  "data",
-  "products.json"
-);
-
-const getProductsFromFile = (callback) => {
-  fs.readFile(productPath, (err, fileContent) => {
-    if (err) {
-      callback([]);
-    } else {
-      callback(JSON.parse(fileContent));
-    }
-  });
-};
+const db = require("../util/database.js");
 
 module.exports = class Product {
-  constructor(id, title, imageUrl, description, price) {
-    this.id = id;
+  constructor(title, imageUrl, description, price) {
     this.title = title;
     this.imageUrl = imageUrl;
     this.description = description;
     this.price = price;
   }
 
-  save() {
-    getProductsFromFile((products) => {
-      if (this.id) {
-        const existingProductsIndex = products.findIndex(
-          (p) => p.id === this.id
-        );
-        const updatedProducts = [...products];
-        updatedProducts[existingProductsIndex] = this;
-        fs.writeFile(productPath, JSON.stringify(updatedProducts), (err) => {
-          console.log(err);
-        });
-      } else {
-        this.id = (Math.random() + Date.now()).toString();
-        products.push(this);
-        fs.writeFile(productPath, JSON.stringify(products), (err) => {
-          console.log(err);
-        });
-      }
-    });
+  async save() {
+    try {
+      await db.execute(
+        "INSERT INTO products (title, price, description, imageUrl) VALUES (?, ?, ?, ?)",
+        [this.title, this.price, this.description, this.imageUrl]
+      );
+    } catch (err) {
+      console.log(err);
+    }
   }
 
-  static deleteProductById(id) {
-    getProductsFromFile((products) => {
-      const updatedProducts = products.filter((p) => p.id!== id); // skip the product that mach the id
-      fs.writeFile(productPath, JSON.stringify(updatedProducts), (err) => {
-        console.log(err);
-      });
-    });
+  static async updateProductByID(
+    productId,
+    updatedTitle,
+    updatedImageUrl,
+    updatedDescription,
+    updatedPrice
+  ) {
+    try {
+      await db.execute(
+        "UPDATE products SET title =?, imageUrl =?, description =?, price =? WHERE id =?",
+        [updatedTitle, updatedImageUrl, updatedDescription, updatedPrice, productId]
+      );
+    } catch (err) {
+      console.log(err);
+    }
   }
 
-
-  static findById(id, cb) {
-    getProductsFromFile((products) => {
-      const product = products.find((p) => p.id === id);
-      cb(product);
-    });
+  static async deleteProductById(id) {
+    try {
+      await db.execute("DELETE FROM products WHERE id =?", [id]);
+    } catch (err) {
+      console.log(err);
+    }
   }
 
-  static fetchAll(cb) {
-    getProductsFromFile(cb);
+  static async findById(id) {
+    try {
+      return await db.execute("SELECT * FROM products WHERE products.id = ?", [
+        id,
+      ]);
+    } catch (err) {
+      console.log(err);
+      return [[], []];
+    }
+  }
+
+  static async fetchAll() {
+    try {
+      const result = await db.execute("SELECT * FROM products");
+      return result;
+    } catch (err) {
+      console.log(err);
+      return [[], []];
+    }
   }
 };

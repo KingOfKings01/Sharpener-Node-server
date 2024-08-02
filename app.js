@@ -34,11 +34,20 @@ app.set('view engine', 'ejs');
 app.set('views', 'views');
 
 const adminRoutes = require('./routes/admin');
-const shopRoutes = require('./routes/shop');
+const shopRoutes = require('./routes/shop'); 
 const contactRouters = require("./routes/contact");
 const successRouters = require("./routes/success");
 
-db.execute('SELECT * FROM products')
+// async function getAll(){
+//     try{
+//         const data = await db.execute('SELECT * FROM products')
+//         console.log(data[0])
+//     } catch(err){
+//         console.log(err)
+//     }
+// }
+
+// getAll()
 
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(express.static(path.join(__dirname, 'public')));
