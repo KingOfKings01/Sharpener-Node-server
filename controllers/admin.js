@@ -10,7 +10,8 @@ exports.getAddProduct = (req, res, next) => {
 
 exports.postAddProduct = async (req, res, next) => {
   const { title, imageUrl, price, description } = req.body;
-  await Product.create({ title, imageUrl, description, price });
+  //// await Product.create({ title, imageUrl, description, price });
+  await req.user.createProduct({ title, imageUrl, description, price });
   res.redirect("/");
 };
 
@@ -21,9 +22,10 @@ exports.getEditProduct = async (req, res, next) => {
   const productId = req.params.id;
 
   try {
-    const product = await Product.findByPk(productId);
+    //// const product = await Product.findByPk(productId);
+    const product = await req.user.getProducts(productId)
     res.render("admin/edit-product", {
-      product: product,
+      product: product[0],
       pageTitle: "Edit Product",
       path: "/admin/edit-product",
       editing: editMode,
@@ -43,25 +45,23 @@ exports.postEditProduct = async (req, res) => {
   } = req.body;
   try {
     const product = await Product.findByPk(productId);
-    if(!product) 
-      res.redirect("/admin/products");
+    if (!product) res.redirect("/admin/products");
     product.title = updatedTitle;
     product.imageUrl = updatedImageUrl;
     product.price = updatedPrice;
     product.description = updatedDescription;
 
     await product.save();
-    
-    res.redirect("/admin/products");
 
-    
+    res.redirect("/admin/products");
   } catch (err) {
     console.log(err);
   }
 };
 
 exports.getProducts = async (req, res, next) => {
-  const products = await Product.findAll();
+  //// const products = await Product.findAll();
+  const products = await req.user.getProducts();
   res.render("admin/products", {
     prods: products,
     pageTitle: "Admin Products",
@@ -71,6 +71,6 @@ exports.getProducts = async (req, res, next) => {
 
 exports.postDeleteProduct = async (req, res) => {
   const product = await Product.findByPk(req.params.productId);
-  await product.destroy()
+  await product.destroy();
   res.redirect("/admin/products");
 };
